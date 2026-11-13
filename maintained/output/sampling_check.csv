@@ -1,0 +1,3 @@
+sample_kind,n_frame,n_drawn,n_in_deposit,reproduces_deposit
+Rejection,92,20,20,TRUE
+Rounding,92,20,2,FALSE

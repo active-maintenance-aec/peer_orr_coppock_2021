@@ -1,0 +1,9 @@
+column,n_column,row_label,n,share,structural_zero
+Author provided code,20,No errors,13,0.65,FALSE
+Author provided code,20,Resolvable errors,6,0.3,FALSE
+Author provided code,20,Errors requiring further information,3,0.15,FALSE
+Author provided code,20,Data-preparation scripts not archived,3,0.15,FALSE
+Archive added code,11,No errors,3,0.2727272727272727,FALSE
+Archive added code,11,Resolvable errors,8,0.7272727272727273,FALSE
+Archive added code,11,Errors requiring further information,0,0,FALSE
+Archive added code,11,Data-preparation scripts not archived,0,0,TRUE

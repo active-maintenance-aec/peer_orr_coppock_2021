@@ -1,0 +1,234 @@
+---
+title: "Maintained reproduction of Peer, Orr, and Coppock (2021)"
+format:
+  gfm:
+    output-file: README.md
+    toc: true
+  pdf:
+    output-file: peer_orr_coppock_2021_report.pdf
+    toc: true
+    number-sections: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(here)
+library(knitr)
+here::i_am("README.qmd")
+
+latex_out <- knitr::is_latex_output()
+options(width = 200)
+
+gt <- read_csv(
+  here::here("ground_truth", "peer_orr_coppock_2021_ground_truth.csv"),
+  col_types = cols(value_paper = col_character(), .default = col_guess())
+)
+coverage <- read_csv(here::here("ground_truth", "float_coverage.csv"), show_col_types = FALSE)
+run_status <- read_csv(here::here("ground_truth", "archive_run_status.csv"), show_col_types = FALSE)
+overwrites <- read_csv(here::here("ground_truth", "archive_overwrites.csv"), show_col_types = FALSE)
+manifest <- read_csv(here::here("original_manifest.csv"), show_col_types = FALSE)
+extraction <- read_csv(
+  here::here("ground_truth", "published_claims.csv"),
+  col_types = cols(.default = col_character(), needs_block = col_logical())
+)
+cells <- read_csv(here::here("ground_truth", "published_maintext_tables.csv"),
+                  col_types = cols(.default = col_character()))
+text_counts <- read_csv(here::here("maintained", "output", "text_counts.csv"), show_col_types = FALSE)
+sampling_check <- read_csv(here::here("maintained", "output", "sampling_check.csv"), show_col_types = FALSE)
+table_1 <- read_csv(here::here("maintained", "output", "table_1_computational_reproducibility.csv"),
+                    show_col_types = FALSE)
+
+# The errata spine, defined once in errata.qmd and written out by it. This report reads it
+# rather than keeping its own count.
+spine <- read_csv(here::here("errata_entries.csv"), col_types = cols(.default = col_character()))
+n_errata_word <- c("one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+                   "ten")[nrow(spine)]
+
+# claim_id is NA on no row here, but indexing with a bare logical would return extra NA
+# elements the moment one were, so every lookup goes through an accessor asserting one row.
+value <- function(id, column = "value_rewrite") {
+  row <- gt[!is.na(gt$claim_id) & gt$claim_id == id, ]
+  stopifnot(nrow(row) == 1)
+  row[[column]]
+}
+
+n_of <- function(name) {
+  row <- text_counts[text_counts$quantity == name, ]
+  stopifnot(nrow(row) == 1)
+  row$value
+}
+
+show_table <- function(x, caption = NULL) {
+  if (latex_out) {
+    knitr::kable(x, caption = caption, booktabs = TRUE, linesep = "") |>
+      kableExtra::kable_styling(latex_options = c("striped", "scale_down"))
+  } else {
+    knitr::kable(x, caption = caption)
+  }
+}
+```
+
+*Drafted by Claude Opus 5 under the supervision of Alex Coppock.*
+
+## What this repository is
+
+A maintained reproduction of every number in Peer, Orr, and Coppock (2021), which proposes "active maintenance" of replication archives and documents the problem with a random sample of `r n_of("n_sampled")` studies from the ISPS Data Archive. The repository fetches the authors' deposited data, redraws the sample from the archive's study list, recomputes Table 1 and every in-text count, and keeps a ground truth that records, claim by claim, whether the published number reproduces.
+
+All but `r nrow(spine)` of the paper's `r sum(gt$claim_type == "pipeline" & !is.na(gt$match_rewrite))` compared numbers reproduce at the precision the page prints. The `r n_errata_word` that do not are filed as errata in `peer_orr_coppock_2021_errata.pdf`, built from `errata.qmd`: a sampling frame described as 94 studies that is 92 in the archived materials, and a percentage in Table 1 printed as 74 that is 73. Neither changes a conclusion.
+
+| | |
+|---|---|
+| Article | Peer L, Orr LV and Coppock A (2021). "Active Maintenance: A Proposal for the Long-Term Computational Reproducibility of Scientific Results." *PS: Political Science & Politics* 54 (3), 462--466. <https://doi.org/10.1017/S1049096521000366> |
+| Replication archive | <https://doi.org/10.7910/DVN/JLLFGK> (Harvard Dataverse, version 1.0, released 22 February 2021), the deposit the article cites |
+| Second copy of the archive | <https://doi.org/10.60600/YU/STDUPI> (Yale Dataverse). Both files are byte-identical to the Harvard deposit, checked by MD5 and by byte comparison. This repository fetches the Harvard copy. |
+
+### Folder layout
+
+```
+download_original.R    fetches and verifies the deposited archive
+run_all.R              runs everything, in order
+original/              the deposited archive (not redistributed; fetched on demand)
+original_manifest.csv  every deposited file, its size and its published checksum
+maintained/            the rewrite; maintained/output/ holds every number it produces
+maintained/data/       the ISPS Data Archive's public study list the sample was drawn from
+ground_truth/          the extraction, the comparison and the gates
+errata.qmd             corrections to the published article
+```
+
+### How to reproduce
+
+Download the repository, open `peer_orr_coppock_2021.Rproj`, and run:
+
+```r
+source("run_all.R")
+```
+
+`run_all.R` fetches the deposited archive from Harvard Dataverse, verifies every file against its published checksum and byte size, redraws the sample, writes Table 1 and every in-text count, records what the deposit contains, rebuilds the ground truth, and re-verifies the archive. Nothing writes into `original/`. The archive is `r sprintf("%.1f", sum(manifest$bytes) / 1e3)` kB, so the first run downloads almost nothing.
+
+## The paper
+
+The article argues that code in replication archives becomes obsolete within a few years and proposes that researchers, archives, and journals plan for the "active maintenance" of analysis code. Its evidence is a review of a random sample of `r n_of("n_sampled")` studies drawn from the ISPS Data Archive at Yale, all of which were computationally reproducible when deposited. Archive staff re-ran each study's programs between December 2019 and March 2020. `r n_of("n_no_errors")` of the `r n_of("n_deposit")` studies still ran, `r n_of("n_with_errors")` did not, and of the `r n_of("n_archive_r")` studies for which the archive had added R programs, `r n_of("n_archive_r_failed")` of those programs failed to run.
+
+The paper has one table, Table 1, and no figure and no appendix. Every number it reports is a tally over the indicator columns of the deposited study-level file, with two exceptions: the size of the list the sample was drawn from, and a handful of descriptions of the review itself (its dates, its software versions, and a hedged estimate of the effort a motivating example took) that no data in the deposit record.
+
+## Does the deposited archive run?
+
+The deposit is `r nrow(manifest)` files: one data file, `active_maintenance.csv` (Dataverse serves it as a `.tab`), and its codebook. **The deposit contains no code**, so there is no script to run and nothing to overwrite. The two passes the procedure calls for are recorded as not run, and the table of overwritten files is empty:
+
+```{r}
+#| label: archive-run
+#| echo: false
+show_table(run_status |> select(pass, script, outcome, stopped_at))
+```
+
+`ground_truth/run_archive.R` asserts the finding from the files rather than typing it: every deposited file is matched against the extensions that carry code, and the text of each is searched for anything that reads as a program. It finds `r nrow(overwrites)` overwritten files and no code. As a consequence the `value_script` and `match` columns of the ground truth are empty on every row: the authors' own analysis, which was done in Stata, is not part of the archive, and a comparison against the archive's output is not possible.
+
+The sampling script, the one piece of code behind the article's numbers that the authors still hold, was not deposited either. It is reconstructed here and is described under the maintained rewrite.
+
+## Errata
+
+`r str_to_title(n_errata_word)` entries, listed in `peer_orr_coppock_2021_errata.pdf`. The first is a sampling frame of `r value("eval_list_n", "value_paper")` studies, less three books, that the archived materials show to be `r value("eval_list_n")`. The second is a percentage in Table 1 printed one point too high. Neither changes a conclusion.
+
+```{r}
+#| label: errata-list
+#| echo: false
+show_table(spine |> select(entry, class, form, title, location, claim_ids))
+```
+
+### Findings that are not errata
+
+- **The categories overlap, so Table 1's first column does not sum to 20.** It sums to `r sum(table_1$n[table_1$column == "Author provided code"])`. Of the `r n_of("n_with_errors")` studies with errors, `r n_of("n_both_resolvable_kinds")` carry both a resolvable error and an error needing further information, and a study with private-data scripts can also carry an error. The article's counts are right as printed; its text says six and three of seven, which only reconciles with the overlap in view.
+- **Descriptions of the review have no data behind them.** The review window, the Stata, R, and SPSS versions, the July 2017 date of the first review of the motivating example, and the estimate of "perhaps 10 emails and an hour of debugging" are recorded in the extraction as definitional or transcribed claims. They are neither reproducible nor contradicted.
+- **The printed 0 for private-data scripts in the archive-added column is a structural zero.** The codebook defines that indicator over the author-provided scripts only.
+
+## The ground truth
+
+```{r}
+#| label: gt-summary
+#| echo: false
+summary_tbl <- gt |>
+  mutate(
+    verdict = case_when(
+      !is.na(match_rewrite) & match_rewrite == 1 ~ "reproduces",
+      !is.na(match_rewrite) & match_rewrite == 0 ~ "does not reproduce",
+      !is.na(holds) & holds == 1 ~ "holds",
+      !is.na(holds) & holds == 0 ~ "does not hold",
+      .default = "not compared"
+    )
+  ) |>
+  count(claim_type, verdict) |>
+  pivot_wider(names_from = verdict, values_from = n, values_fill = 0)
+show_table(summary_tbl)
+```
+
+The ground truth has `r nrow(gt)` rows: the `r nrow(cells)` printed cells of Table 1, the `r nrow(extraction)` claims of the extraction, and one row recording that the sampling script reproduces the deposited ids. Of the `r sum(gt$claim_type == "pipeline" & !is.na(gt$match_rewrite))` compared numbers, `r sum(gt$match_rewrite == 1, na.rm = TRUE)` reproduce and `r sum(gt$match_rewrite == 0, na.rm = TRUE)` do not, and both of the latter are filed as errata with the locus `paper_internal`: the article disagrees with the materials it cites.
+
+```{r}
+#| label: gt-locus
+#| echo: false
+show_table(gt |> filter(!is.na(defect_locus)) |> select(claim_id, value_paper, value_rewrite, defect_locus, disposition))
+```
+
+### Coverage, float by float
+
+```{r}
+#| label: coverage
+#| echo: false
+show_table(coverage |> select(-plotted, -plotted_reproduced, -note))
+```
+
+`r coverage$note`
+
+## The extraction and the two instruments
+
+`ground_truth/published_claims.csv` is the extraction: every number and every spelled-out number in the article's text, classified by hand as `pipeline` (`r sum(extraction$claim_type == "pipeline")`), `descriptive` (`r sum(extraction$claim_type == "descriptive")`), `definitional` (`r sum(extraction$claim_type == "definitional")`), `structural` (`r sum(extraction$claim_type == "structural")`), or `transcribed` (`r sum(extraction$claim_type == "transcribed")`). The reference list and the in-text citations were not audited. The `r nrow(cells)` cells of Table 1 are transcribed separately in `ground_truth/published_maintext_tables.csv` and compared cell by cell.
+
+`r sum(extraction$needs_block)` extraction rows require a block in `maintained/in_text_claims.R`, the second instrument, and the coverage gate asserts that the claims it prints are exactly those rows. The two instruments reach each number by separate paths: `ground_truth/build_ground_truth.R` reads the tallies in `text_counts.csv`, and `in_text_claims.R` recomputes them from the study-level rows. Where they disagree one of them is wrong, and the build stops. Each printed claim carries a verdict: a claim an erratum corrects must differ from the article and equal the corrected value, and any other claim must equal the article's.
+
+```{r}
+#| label: extraction
+#| echo: false
+show_table(extraction |> count(claim_type, needs_block))
+```
+
+## The maintained rewrite
+
+| Script | Output |
+|---|---|
+| `maintained/sample_20_studies.R` | `sampled_studies.csv`, `sampling_check.csv` |
+| `maintained/table_1_computational_reproducibility.R` | `table_1_computational_reproducibility.csv` and `.tex` |
+| `maintained/text_claims.R` | `study_level.csv`, `text_counts.csv` |
+| `maintained/in_text_claims.R` | printed claims only |
+
+**The sample.** The authors' sampling script was not deposited. The archive's public study list, dated 8 November 2019, is committed under `maintained/data/` and holds `r n_of("n_study_list")` studies. The script draws `r n_of("n_sampled")` from it with `set.seed(343)` and `randomizr::complete_rs()`, and asserts that the set of ids equals the deposit's. It does, under the current default sampler. Under the pre-3.6 sampler the same seed draws a different sample, of which only `r sampling_check$n_in_deposit[sampling_check$sample_kind == "Rounding"]` ids are in the deposit. The default sampler reproduces the deposited ids and the old one does not, which fits a list dated after R 3.6.0 appeared. The rewrite keeps the default sampler.
+
+**Table 1.** Each count is a tally over the deposit's indicator columns: no errors is `issues_orig == 0`, resolvable is `user_resolvable_orig == 1`, requiring further information is `author_resolvable_orig == 1`, and data-preparation scripts not archived is `scripts_for_private_data == 1`. The archive-added column is the `r n_of("n_archive_r")` studies with a non-missing `issues_isps`, tallied the same way on the `_isps` columns.
+
+## Table 1 verification
+
+```{r}
+#| label: table-1
+#| echo: false
+table_check <- gt |>
+  filter(claim_id %in% cells$claim_id) |>
+  transmute(cell = str_remove(claim, "^Table 1, "), printed = value_paper,
+            rewrite = sprintf("%.*f", digits, value_rewrite),
+            reproduces = if_else(match_rewrite == 1, "yes", "no"))
+show_table(table_check)
+```
+
+`r coverage$reproduced_by_rewrite` of the `r coverage$published_numbers` printed cells reproduce. The one that does not is the archive-added column's percentage of resolvable errors, which prints 74 where 8 of 11 is 72.7, and rounds to `r sprintf("%.0f", value("table_1_archive_resolvable_errors_pct"))` (errata entry 2).
+
+## Rewrite verification
+
+`run_all.R` runs end to end from a clean session, and a second run leaves every committed file byte-identical. The only quantity that depends on a random draw is the sample, which is seeded, and its result is asserted against the deposit on every run. The repository writes no figure.
+
+## R environment
+
+```{r}
+#| label: session
+#| echo: false
+sessionInfo()
+```

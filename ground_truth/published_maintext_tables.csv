@@ -1,0 +1,17 @@
+table,claim_id,location,row_label,column,statistic,value_paper
+Table 1,table_1_author_n_column,Table 1,N,Author provided code,n_column,20
+Table 1,table_1_archive_n_column,Table 1,N,Archive added code,n_column,11
+Table 1,table_1_author_no_errors_n,Table 1,No errors,Author provided code,n,13
+Table 1,table_1_author_no_errors_pct,Table 1,No errors,Author provided code,pct,65
+Table 1,table_1_author_resolvable_errors_n,Table 1,Resolvable errors,Author provided code,n,6
+Table 1,table_1_author_resolvable_errors_pct,Table 1,Resolvable errors,Author provided code,pct,30
+Table 1,table_1_author_errors_requiring_further_information_n,Table 1,Errors requiring further information,Author provided code,n,3
+Table 1,table_1_author_errors_requiring_further_information_pct,Table 1,Errors requiring further information,Author provided code,pct,15
+Table 1,table_1_author_data_preparation_scripts_not_archived_n,Table 1,Data-preparation scripts not archived,Author provided code,n,3
+Table 1,table_1_author_data_preparation_scripts_not_archived_pct,Table 1,Data-preparation scripts not archived,Author provided code,pct,15
+Table 1,table_1_archive_no_errors_n,Table 1,No errors,Archive added code,n,3
+Table 1,table_1_archive_no_errors_pct,Table 1,No errors,Archive added code,pct,27
+Table 1,table_1_archive_resolvable_errors_n,Table 1,Resolvable errors,Archive added code,n,8
+Table 1,table_1_archive_resolvable_errors_pct,Table 1,Resolvable errors,Archive added code,pct,74
+Table 1,table_1_archive_errors_requiring_further_information_n,Table 1,Errors requiring further information,Archive added code,n,0
+Table 1,table_1_archive_data_preparation_scripts_not_archived_n,Table 1,Data-preparation scripts not archived,Archive added code,n,0

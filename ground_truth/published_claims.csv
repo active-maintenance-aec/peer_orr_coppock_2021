@@ -1,0 +1,41 @@
+claim_id,location,claim_type,claim,value_paper,digits,comparison,expect,needs_block,notes
+abstract_n_errors_studies,"p. 462, Abstract",pipeline,"Studies with nontrivial errors, from the abstract: 'nontrivial errors in seven of 20 studies'",7,0,==,,TRUE,Spelled out in the abstract. Equals the number of studies with issues_orig == 1.
+abstract_n_sampled,"p. 462, Abstract",pipeline,"Studies sampled, from the abstract: 'seven of 20 studies'",20,0,==,,TRUE,The denominator of the abstract's seven.
+eval_list_n,"p. 463, Evaluation",pipeline,"Studies on the list the sample was drawn from: 'a list of all 97 archived studies, excluded three books'",97,0,==,,TRUE,The sentence implies a frame of 94 (97 less three books). The study list the sampling script reads has 92 rows and no deposited or archived material reconciles either figure with it.
+eval_books_excluded,"p. 463, Evaluation",definitional,Books excluded from the list: 'excluded three books',3,0,==,,FALSE,"No book indicator exists in the study list or the deposit, so the count has no counterpart in the pipeline. Neither the 97 nor the three can be reconciled with the 92-row list."
+eval_sample_n,"p. 463, Evaluation",pipeline,Studies randomly selected: 'randomly selected 20 studies',20,0,==,,TRUE,The sampling script draws 20 and reproduces the deposited ids.
+eval_year_first,"p. 463, Evaluation",pipeline,Earliest archive year in the sample: 'archived between 2009 and 2019',2009,0,==,,TRUE,
+eval_year_last,"p. 463, Evaluation",pipeline,Latest archive year in the sample: 'archived between 2009 and 2019',2019,0,==,,TRUE,
+eval_files_min,"p. 463, Evaluation",pipeline,Fewest files associated with a sampled study: 'from four to 88 files',4,0,==,,TRUE,Spelled out: four.
+eval_files_max,"p. 463, Evaluation",pipeline,Most files associated with a sampled study: 'from four to 88 files',88,0,==,,TRUE,
+eval_stata_n,"p. 463, Evaluation",pipeline,"Studies archived with Stata: 'Stata (18), R (one), and SPSS (one)'",18,0,==,,TRUE,
+eval_r_n,"p. 463, Evaluation",pipeline,"Studies archived with R: 'Stata (18), R (one), and SPSS (one)'",1,0,==,,TRUE,Spelled out: one.
+eval_spss_n,"p. 463, Evaluation",pipeline,"Studies archived with SPSS: 'Stata (18), R (one), and SPSS (one)'",1,0,==,,TRUE,Spelled out: one.
+eval_review_window,"p. 463, Evaluation",definitional,Review window: 'Between December 2019 and March 2020',,,,,FALSE,A date range for work the deposit does not record.
+eval_stata_version,"p. 463, Evaluation",transcribed,Stata version used by archive staff: 'Stata 15',15,0,==,,FALSE,Software versions of the 2019 to 2020 review; the deposit records none.
+eval_r_version_a,"p. 463, Evaluation",transcribed,First R version used by archive staff: 'R 3.6.1',3.6.1,,==,,FALSE,Software versions of the 2019 to 2020 review; the deposit records none.
+eval_r_version_b,"p. 463, Evaluation",transcribed,Second R version used by archive staff: 'R 3.6.2',3.6.2,,==,,FALSE,Software versions of the 2019 to 2020 review; the deposit records none.
+eval_spss_version,"p. 463, Evaluation",transcribed,SPSS version used by archive staff: 'SPSS 26',26,0,==,,FALSE,Software versions of the 2019 to 2020 review; the deposit records none.
+eval_reproduced_of_n,"p. 463, Evaluation",pipeline,"Studies in the reproduction count's denominator: 'Of these 20 studies, 13 could be reproduced'",20,0,==,,TRUE,
+eval_reproduced_n,"p. 463, Evaluation",pipeline,"Studies reproduced with present-day software: 'Of these 20 studies, 13 could be reproduced'",13,0,==,,TRUE,Equals the number with issues_orig == 0 and Table 1's first cell.
+eval_remaining_n,"p. 463, Evaluation",pipeline,Studies with challenges to reproducibility: 'the remaining seven studies',7,0,==,,TRUE,Spelled out: seven.
+eval_resolvable_n,"p. 463, Evaluation",pipeline,Studies with errors resolvable by seasoned analysts: 'In six studies',6,0,==,,TRUE,Spelled out: six.
+eval_further_info_n,"p. 464, Evaluation",pipeline,"Studies with errors needing further information: 'In three of the studies, program files produced errors that could not be resolved'",3,0,==,,TRUE,"Spelled out: three. Two studies are in both this group and the resolvable group, so the six and the three sum to nine across seven studies."
+eval_private_data_n,"p. 464, Evaluation",pipeline,"Studies whose raw data and cleaning files were not deposited: 'In three of the 20 studies, raw data and associated cleaning files were not deposited'",3,0,==,,TRUE,Spelled out: three.
+eval_private_data_of_n,"p. 464, Evaluation",pipeline,Studies in the private-data count's denominator: 'In three of the 20 studies',20,0,==,,TRUE,
+eval_archive_r_n,"p. 464, Evaluation",pipeline,"Studies for which archive staff added R files: 'For 11 of the studies, archive staff added R files'",11,0,==,,TRUE,
+eval_archive_r_failed_n,"p. 464, Evaluation",pipeline,Studies whose archive-added R programs did not run: 'Of the eight instances in which the R programs did not run',8,0,==,,TRUE,Spelled out: eight.
+eval_package_changes_n,"p. 464, Evaluation",pipeline,"Studies relying on removed or updated packages: 'three studies relied on packages that had been removed from CRAN (e.g., Design) or updated in ways that made it impossible to run the original syntax (e.g., Zelig)'",3,0,==,,TRUE,Spelled out: three.
+eval_package_design_named,"p. 464, Evaluation",descriptive,"Design is a package that archive-added R programs relied on, as the sentence's example",,0,,,TRUE,A truth value: Design appears among the named packages.
+eval_package_zelig_named,"p. 464, Evaluation",descriptive,"Zelig is a package that archive-added R programs relied on, as the sentence's example",,0,,,TRUE,A truth value: Zelig appears among the named packages.
+eval_decade_years,"p. 464, Evaluation",descriptive,Span of the archive years: 'even in the relatively short 10-year period',10,0,==,,TRUE,The years from the earliest to the latest archive year in the sample.
+table_1_title_n,"p. 464, Evaluation",pipeline,Studies in Table 1's title: 'Computational Reproducibility in 20 Studies',20,0,==,,TRUE,"The table's own cells are compared in the ground truth, cell by cell."
+motivating_review_month,"p. 463, Motivating example",definitional,Month of the first ISPS review of Coppock (2017): 'in July 2017',,,,,FALSE,A date for events the deposit does not record.
+motivating_years_later,"p. 463, Motivating example",definitional,Years between the two reviews: 'Two years later',2,0,==,,FALSE,Spelled out: two. Not recorded in the deposit.
+motivating_emails,"p. 463, Motivating example",definitional,Emails the extension cost: 'perhaps 10 emails and an hour of debugging',10,0,==,,FALSE,A hedged personal estimate with no data behind it.
+motivating_hours,"p. 463, Motivating example",definitional,Hours of debugging: 'perhaps 10 emails and an hour of debugging',1,0,==,,FALSE,A hedged personal estimate with no data behind it.
+dynamic_horizon_years,"p. 463, Computational reproducibility is dynamic",definitional,Hypothetical horizon: 'less interpretable to users 50 years in the future',50,0,==,,FALSE,"A hypothetical illustration, not an empirical claim."
+dynamic_sampler_year,"p. 463, Computational reproducibility is dynamic",transcribed,Year R changed its sampler: 'R updated how it generates random samples in 2019',2019,0,==,,FALSE,R 3.6.0 was released in April 2019. The maintained sampling script records that the pre-3.6 sampler does not reproduce the deposited ids.
+maintenance_fields_n,"p. 464, Active maintenance",structural,Fields the strategies draw from: 'a combination of strategies drawn from two fields',2,0,==,,FALSE,Spelled out: two. The sentence names data preservation and code development.
+discussion_questions_n,"p. 465, Discussion",structural,Questions active maintenance raises: 'which raises two important questions',2,0,==,,FALSE,Spelled out: two. The next sentence poses two.
+data_availability_doi,"p. 465, Data availability statement",structural,Deposit DOI the article cites: 'DOI:10.7910/DVN/JLLFGK',,,,,FALSE,Verified at the point of use: download_original.R fetches this dataset.

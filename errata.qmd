@@ -1,0 +1,208 @@
+---
+title: "Errata for *Active Maintenance: A Proposal for the Long-Term Computational Reproducibility of Scientific Results*"
+format:
+  pdf:
+    output-file: peer_orr_coppock_2021_errata.pdf
+    toc: false
+    number-sections: false
+    geometry: margin=1in
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(here)
+here::i_am("errata.qmd")
+
+extraction <- read_csv(
+  here::here("ground_truth", "published_claims.csv"),
+  col_types = cols(.default = col_character())
+)
+
+# Every corrected value is computed from the pipeline's committed output, never typed.
+text_counts <- read_csv(here::here("maintained", "output", "text_counts.csv"),
+                        show_col_types = FALSE)
+table_1 <- read_csv(here::here("maintained", "output", "table_1_computational_reproducibility.csv"),
+                    show_col_types = FALSE)
+
+count <- function(name) {
+  row <- text_counts[text_counts$quantity == name, ]
+  stopifnot(nrow(row) == 1)
+  row$value
+}
+
+published <- function(id) {
+  row <- extraction[extraction$claim_id == id, ]
+  stopifnot(nrow(row) == 1)
+  row$value_paper
+}
+
+# Entry 1: the frame the sample was drawn from.
+frame_n <- count("n_study_list")
+sampled_n <- count("n_sampled")
+published_list_n <- as.numeric(published("eval_list_n"))
+published_books_n <- as.numeric(published("eval_books_excluded"))
+implied_frame_n <- published_list_n - published_books_n
+
+# Entry 2: Table 1's percentage for resolvable errors in the archive-added column.
+resolvable_archive <- table_1 |>
+  filter(column == "Archive added code", row_label == "Resolvable errors")
+stopifnot(nrow(resolvable_archive) == 1)
+resolvable_n <- resolvable_archive$n
+resolvable_of <- resolvable_archive$n_column
+resolvable_pct_exact <- 100 * resolvable_archive$share
+resolvable_pct <- sprintf("%.0f", resolvable_pct_exact)
+published_resolvable_pct <- published_resolvable <- "74"
+no_errors_archive <- table_1 |>
+  filter(column == "Archive added code", row_label == "No errors")
+no_errors_pct_exact <- 100 * no_errors_archive$share
+no_errors_pct <- sprintf("%.0f", no_errors_pct_exact)
+stopifnot(resolvable_pct != published_resolvable_pct)
+```
+
+```{r}
+#| label: entries
+#| include: false
+
+# THE ERRATA SPINE. Every entry is defined once, here, and rendered from this tibble into
+# this document and into the machine-readable errata_entries.csv written at the bottom of
+# the file, which is what any other document carrying these corrections reads.
+#
+# [[...]] marks the span that changes. Each renderer supplies its own markup for it: bold
+# here. Nothing else in a field is markup.
+#
+# Numbering follows PROCEDURES.md Stage 4b: the quantity entry, then the float entry.
+# Entry 2 is class float because the claim it corrects is a cell of Table 1, which has no
+# row in the extraction and so no block in in_text_claims.R; the ground truth compares the
+# cell directly against the published transcription.
+#
+# claim_ids is the semicolon-separated list of ground-truth claim_id values the entry
+# corrects. corrected_values runs parallel to it, one value per id, built from the same
+# expression that builds the marked span of the corrected sentence.
+cv_frame <- as.character(frame_n)
+
+entries <- tribble(
+  ~entry, ~class, ~source, ~form, ~title, ~location, ~published, ~corrected, ~note, ~claim_ids, ~corrected_values,
+
+  1, "quantity", "pipeline", "full",
+  "The number of studies the sample was drawn from",
+  "p. 463, Evaluation",
+  "We compiled a list of [[all 97]] archived studies[[, excluded three books,]] and then randomly selected 20 studies (Peer, Orr, and Coppock 2021).",
+  str_glue("We compiled a list of [[{cv_frame}]] archived studies and then randomly selected 20 studies (Peer, Orr, and Coppock 2021)."),
+  str_glue(
+    "The sentence implies a sampling frame of {implied_frame_n} studies, {published_list_n} less ",
+    "{published_books_n} books. The study list the sampling script reads, ",
+    "ISPSDataArchive_StudyList_20191108.csv, has {frame_n} rows, and drawing {sampled_n} from ",
+    "that list with the seed and sampler the authors used returns exactly the {sampled_n} study ids ",
+    "the deposit carries. The list has no field marking a book. The published {published_list_n} ",
+    "and {published_books_n} books cannot be reconciled with the {frame_n}-row list from the ",
+    "deposited or archived materials, so either the total or the exclusion count is misstated, ",
+    "and the corrected sentence states only what the materials show. The sample of {sampled_n}, ",
+    "its selection, and every count computed from it are unaffected."),
+  "eval_list_n",
+  cv_frame,
+
+  2, "float", "pipeline", "brief",
+  "A percentage printed one point too high in Table 1",
+  "p. 464, Table 1",
+  "Resolvable errors, Archive Added Code: 8 ([[74]]%)",
+  str_glue("Resolvable errors, Archive Added Code: 8 ([[{resolvable_pct}]]%)"),
+  str_glue(
+    "{resolvable_n} of {resolvable_of} studies is {sprintf('%.1f', resolvable_pct_exact)} per ",
+    "cent, which rounds to {resolvable_pct}. The neighbouring cell, 3 (27%), is ",
+    "{sprintf('%.1f', no_errors_pct_exact)} per cent and is rounded correctly, and the column's ",
+    "two percentages, {no_errors_pct} and {resolvable_pct}, then sum to 100. The count of ",
+    "{resolvable_n} is right."),
+  "table_1_archive_resolvable_errors_pct",
+  NA_character_
+) |>
+  mutate(across(c(title, published, corrected, note, claim_ids, corrected_values), as.character))
+
+stopifnot(nrow(entries) == max(entries$entry), !anyDuplicated(entries$entry))
+
+# values_in_spans is NA for an entry with no values, and TRUE where the value is the token
+# the sentence prints.
+entries <- entries |>
+  mutate(values_in_spans = if_else(is.na(corrected_values), NA, TRUE))
+
+# Gate: corrected_values agrees with the sentence it was glued into ----
+marked_spans <- function(x) str_match_all(x, "\\[\\[(.*?)\\]\\]")[[1]][, 2]
+
+quantified <- entries |>
+  filter(!is.na(corrected_values), values_in_spans) |>
+  mutate(ids = str_split(claim_ids, ";"), values = str_split(corrected_values, ";"),
+         spans = map(corrected, marked_spans))
+
+stopifnot(all(lengths(quantified$ids) == lengths(quantified$values)))
+
+value_placed <- pmap_lgl(quantified, function(...) {
+  e <- list(...)
+  if (length(e$values) == length(e$spans)) {
+    all(map2_lgl(e$values, e$spans, \(v, s) str_detect(s, fixed(v))))
+  } else {
+    all(map_lgl(e$values, \(v) any(map_lgl(e$spans, \(s) str_detect(s, fixed(v))))))
+  }
+})
+
+if (!all(value_placed)) {
+  print(quantified |> filter(!value_placed) |> select(entry, title, corrected_values, corrected))
+  stop("An entry's corrected_values are not in the spans of its corrected sentence.")
+}
+
+has_ids <- !is.na(entries$claim_ids) & nzchar(entries$claim_ids)
+stopifnot(
+  all(!is.na(entries$corrected_values[entries$class == "quantity" & entries$form != "note" & has_ids])),
+  all(is.na(entries$corrected_values[entries$class != "quantity" | entries$form == "note"])),
+  all(is.na(entries$corrected_values) | has_ids)
+)
+
+# Every id an entry corrects must be a real claim. The extraction holds the prose claims;
+# Table 1's cells live in the published transcription of the table.
+table_cells <- read_csv(here::here("ground_truth", "published_maintext_tables.csv"),
+                        col_types = cols(.default = col_character()))
+cited_ids <- entries$claim_ids |>
+  str_split(";") |>
+  unlist() |>
+  str_trim() |>
+  discard(\(x) is.na(x) | x == "")
+stopifnot(all(cited_ids %in% c(extraction$claim_id, table_cells$claim_id)))
+
+# The published token the entry corrects must be the one the transcription records.
+stopifnot(published("eval_list_n") == "97",
+          table_cells$value_paper[table_cells$claim_id == "table_1_archive_resolvable_errors_pct"] ==
+            published_resolvable_pct)
+
+bold <- function(x) str_replace_all(x, "\\[\\[(.*?)\\]\\]", "**\\1**")
+```
+
+Two corrections to the *PS: Political Science & Politics* article
+`r "10.1017/S1049096521000366"`. Neither changes a conclusion of the article. Every corrected value
+below is computed at render time from a full reproduction of the published counts, held in the
+repository `active-maintenance-aec/peer_orr_coppock_2021`. Bold marks the tokens that changed;
+everything else in each corrected sentence is the published wording.
+
+```{r}
+#| label: render-entries
+#| echo: false
+#| results: asis
+
+# A heading is only a heading when a blank line precedes it, so every entry opens with one.
+walk(seq_len(nrow(entries)), function(i) {
+  e <- entries[i, ]
+  cat("\n\n## ", e$entry, ". ", e$title, "\n\n> ", bold(e$published),
+      "\n\n**Corrected:** ", bold(e$corrected), "\n\n", e$note, "\n", sep = "")
+})
+```
+
+```{r}
+#| label: emit-spine
+#| include: false
+
+stopifnot(
+  all(entries$class %in% c("quantity", "description", "interpretation", "definition", "label", "float", "cross_reference", "wording", "spelling", "typography", "bibliographic")),
+  all(entries$form %in% c("full", "brief", "note")),
+  all(entries$source %in% c("pipeline", "reading", "reference_audit", "publisher_record", "authors_archive", "proof"))
+)
+write_csv(entries, here("errata_entries.csv"))
+```

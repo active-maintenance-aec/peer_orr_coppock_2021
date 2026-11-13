@@ -1,0 +1,3 @@
+pass,script,role,exit_status,outcome,stopped_at
+as_shipped,none deposited,other,NA,not_run,"The deposit holds 2 files (active_maintenance_codebook.txt, active_maintenance.csv) and no script."
+stripped,none deposited,other,NA,not_run,"The deposit holds 2 files (active_maintenance_codebook.txt, active_maintenance.csv) and no script."
