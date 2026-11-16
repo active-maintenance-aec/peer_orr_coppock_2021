@@ -1,5 +1,6 @@
 # Maintained reproduction of Peer, Orr, and Coppock (2021)
 
+**Archived at Zenodo:** [doi:10.5281/zenodo.24289043](https://doi.org/10.5281/zenodo.24289043). This DOI always resolves to the latest release of the maintained version.
 
 - [What this repository is](#what-this-repository-is)
   - [Folder layout](#folder-layout)
